@@ -7,11 +7,11 @@ angular.module('factories', [])
 .factory('PublicInfoFactory',function($http){
 
     return {
-        fire : getJson.bind(null, 'datasets/firestation-cleaned.json'),
-        parks : getJson.bind(null, 'datasets/parks-cleaned.json'),
-        hotspots : getJson.bind(null, 'datasets/hotspot-cleaned.json'),
+        fire: getJson.bind(null, 'https://data.nashville.gov/api/views/frq9-a5iv/rows.json'),
+        parks: getJson.bind(null, 'https://data.nashville.gov/api/views/74d7-b74t/rows.json'),
+        hotspots: getJson.bind(null, 'https://data.nashville.gov/api/views/4ugp-s85t/rows.json'),
         community : getJson.bind(null, 'datasets/community-centers-cleaned.json'),
-        police : getJson.bind(null, 'datasets/police-cleaned.json')
+        police: getJson.bind(null, 'https://data.nashville.gov/api/views/y5ik-ut5s/rows.json')
     };
 
 
@@ -29,8 +29,7 @@ angular.module('factories', [])
     function PlacePoints(points, map) {
         var res = [];
         points.forEach(function(el){
-            console.log(el);
-            var curMarker = L.marker.apply(null, el)
+            var curMarker = L.marker.apply(null, el);
             res.push(curMarker);
             curMarker.addTo(map);
         });

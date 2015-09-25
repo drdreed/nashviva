@@ -27,19 +27,51 @@
         else{
             info[type]()
             .success(function (data) {
-                var markPoints = data.map(function(el){
-                    return [el.location.reverse(), {title:el.address}];
-                });
-                vm[type] = map.PlacePoints(markPoints, leaf);
+                    var markPoints;
+                    if (data.hasOwnProperty("data")) {
+                        switch (type) {
+                            case "fire":
+                                markPoints = processJSON(data, 13, 9);
+                                break;
+                            case "police":
+                                markPoints = processJSON(data, 16, 8);
+                                break;
+                            case "parks":
+                                markPoints = processJSON(data, 41, 8);
+                                break;
+                            case "hotspots":
+                                markPoints = processJSON(data, 11, 8);
+                                break;
+                        }
+                        markPoints = markPoints.filter(function (n) {
+                            return n != undefined
+                        });
+                    } else {
+                        markPoints = data.map(function (el) {
+                            return [el.location.reverse(), {title: el.address}];
+                        });
+                    }
+                    vm[type] = map.PlacePoints(markPoints, leaf);
             })
             .error(function (data) {
-                console.error(data);
+                    console.error("error" + data);
             });
         }
     };
-
-    
     vm.toggle('fire');
 });
 
 })();
+
+
+function processJSON(data, locationKey, titleKey) {
+    return data.data.map(function (el) {
+        var lat = el[locationKey][1];
+        var long = el[locationKey][2];
+        var location = ["", ""];
+        if (lat !== null && long !== null) {
+            location = [el[locationKey][1], el[locationKey][2]];
+            return [location, {title: el[titleKey]}];
+        }
+    });
+}

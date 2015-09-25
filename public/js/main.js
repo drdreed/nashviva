@@ -7,11 +7,11 @@ angular.module('factories', [])
 .factory('PublicInfoFactory',function($http){
 
     return {
-        fire : getJson.bind(null, 'datasets/firestation-cleaned.json'),
-        parks : getJson.bind(null, 'datasets/parks-cleaned.json'),
-        hotspots : getJson.bind(null, 'datasets/hotspot-cleaned.json'),
+        fire: getJson.bind(null, 'https://data.nashville.gov/api/views/frq9-a5iv/rows.json'),
+        parks: getJson.bind(null, 'https://data.nashville.gov/api/views/74d7-b74t/rows.json'),
+        hotspots: getJson.bind(null, 'https://data.nashville.gov/api/views/4ugp-s85t/rows.json'),
         community : getJson.bind(null, 'datasets/community-centers-cleaned.json'),
-        police : getJson.bind(null, 'datasets/police-cleaned.json')
+        police: getJson.bind(null, 'https://data.nashville.gov/api/views/y5ik-ut5s/rows.json')
     };
 
 
@@ -29,8 +29,7 @@ angular.module('factories', [])
     function PlacePoints(points, map) {
         var res = [];
         points.forEach(function(el){
-            console.log(el);
-            var curMarker = L.marker.apply(null, el)
+            var curMarker = L.marker.apply(null, el);
             res.push(curMarker);
             curMarker.addTo(map);
         });
@@ -77,22 +76,54 @@ angular.module('factories', [])
         else{
             info[type]()
             .success(function (data) {
-                var markPoints = data.map(function(el){
-                    return [el.location.reverse(), {title:el.address}];
-                });
-                vm[type] = map.PlacePoints(markPoints, leaf);
+                    var markPoints;
+                    if (data.hasOwnProperty("data")) {
+                        switch (type) {
+                            case "fire":
+                                markPoints = processJSON(data, 13, 9);
+                                break;
+                            case "police":
+                                markPoints = processJSON(data, 16, 8);
+                                break;
+                            case "parks":
+                                markPoints = processJSON(data, 41, 8);
+                                break;
+                            case "hotspots":
+                                markPoints = processJSON(data, 11, 8);
+                                break;
+                        }
+                        markPoints = markPoints.filter(function (n) {
+                            return n != undefined
+                        });
+                    } else {
+                        markPoints = data.map(function (el) {
+                            return [el.location.reverse(), {title: el.address}];
+                        });
+                    }
+                    vm[type] = map.PlacePoints(markPoints, leaf);
             })
             .error(function (data) {
-                console.error(data);
+                    console.error("error" + data);
             });
         }
     };
-
-    
     vm.toggle('fire');
 });
 
 })();
+
+
+function processJSON(data, locationKey, titleKey) {
+    return data.data.map(function (el) {
+        var lat = el[locationKey][1];
+        var long = el[locationKey][2];
+        var location = ["", ""];
+        if (lat !== null && long !== null) {
+            location = [el[locationKey][1], el[locationKey][2]];
+            return [location, {title: el[titleKey]}];
+        }
+    });
+}
 
 (function () {
 
