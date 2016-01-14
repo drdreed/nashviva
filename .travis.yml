@@ -1,3 +1,9 @@
+language: node_js
+node_js:
+  - '0.10.33'
 before_script:
-  - npm install gulp
-script: gulp
+  - 'npm install gulp'
+  - 'npm install' # install npm packages
+
+after_script:
+  - 'gulp default' # or other command for build, run tests, etc
